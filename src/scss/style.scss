@@ -1,0 +1,39 @@
+// Variables
+$color-principal: #3498db;
+$color-secundario: #2ecc71;
+$color-texto: #333;
+
+// Estilos globales
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 0;
+}
+
+// Contenedor
+.container {
+  text-align: center;
+  margin-top: 100px;
+
+  h1 {
+    color: $color-principal;
+  }
+
+  p {
+    color: $color-texto;
+    font-size: 18px;
+  }
+
+  button {
+    background-color: $color-secundario;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+
+    &:hover {
+      background-color: darken($color-secundario, 10%);
+    }
+  }
+}
