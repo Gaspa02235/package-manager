@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}Carrito — Gymmies Store{% endblock %}
+
+{% block content %}
+<section class="cart-section">
+    <div class="container">
+
+        <div class="section-header">
+            <div class="section-tag">Mi Carrito</div>
+            <h2 class="section-title">🛒 Tu Pedido</h2>
+        </div>
+
+        {% if items %}
+        <div class="cart-layout">
+            <!-- Cart Items -->
+            <div class="cart-items">
+                {% for item in items %}
+                <div class="cart-item">
+                    <div class="cart-item-img">
+                        <div class="cart-img-placeholder">🏋️</div>
+                    </div>
+                    <div class="cart-item-info">
+                        <h3 class="cart-item-name">{{ item['nombre'] }}</h3>
+                        <p class="cart-item-qty">Cantidad: <strong>{{ item['cantidad'] }}</strong></p>
+                        <p class="cart-item-price">${{ "%.2f"|format(item['precio']) }} c/u</p>
+                    </div>
+                    <div class="cart-item-right">
+                        <span class="cart-item-subtotal">${{ "%.2f"|format(item['subtotal']) }}</span>
+                        <a href="{{ url_for('eliminar_carrito', id=item['id']) }}" class="cart-remove" title="Eliminar">✕</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Order Summary -->
+            <div class="cart-summary">
+                <h3 class="summary-title">Resumen del Pedido</h3>
+
+                <div class="summary-rows">
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span>${{ "%.2f"|format(subtotal) }}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Envío</span>
+                        <span class="free-shipping">{% if envio == 0 %}🎉 GRATIS{% else %}${{ "%.2f"|format(envio) }}{% endif %}</span>
+                    </div>
+                    {% if subtotal < 999 %}
+                    <div class="shipping-notice">
+                        Agrega ${{ "%.2f"|format(999 - subtotal) }} más para envío gratis
+                    </div>
+                    {% endif %}
+                    <div class="summary-divider"></div>
+                    <div class="summary-row summary-total">
+                        <span>Total</span>
+                        <span>${{ "%.2f"|format(total) }} MXN</span>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('checkout') }}" class="btn-primary btn-full btn-checkout"
+                   style="display:block;text-align:center;text-decoration:none;margin-top:1rem;">
+                    ⚡ Finalizar Compra
+                </a>
+
+                <a href="{{ url_for('index') }}" class="btn-outline btn-full">
+                    ← Seguir Comprando
+                </a>
+
+                <div class="secure-badge">
+                    🔒 Compra 100% segura
+                </div>
+            </div>
+        </div>
+
+        {% else %}
+        <div class="empty-cart">
+            <div class="empty-cart-icon">🛒</div>
+            <h3>Tu carrito está vacío</h3>
+            <p>¡Agrega productos y empieza a entrenar como un pro!</p>
+            <a href="{{ url_for('index') }}" class="btn-primary">Ver Productos</a>
+        </div>
+        {% endif %}
+
+    </div>
+</section>
+{% endblock %}

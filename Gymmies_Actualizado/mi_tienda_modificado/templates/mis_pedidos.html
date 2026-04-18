@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Mis Pedidos — Gymmies Store{% endblock %}
+
+{% block content %}
+<section class="orders-section">
+    <div class="container">
+
+        <div class="section-header">
+            <div class="section-tag">Mi Cuenta</div>
+            <h2 class="section-title">🧾 Mis Pedidos</h2>
+        </div>
+
+        {% if pedidos %}
+        {% for p in pedidos %}
+        {% set status_order = ['recibido','preparando','enviado','en_camino','entregado'] %}
+        {% set current_idx = status_order.index(p['status']) %}
+
+        <a href="{{ url_for('detalle_pedido', id=p['id']) }}" style="text-decoration:none;">
+        <div class="order-card">
+            <div class="order-card-header">
+                <div>
+                    <div style="font-weight:800;font-size:1rem;">Pedido #{{ p['id'] }}</div>
+                    <div class="order-date">{{ p['fecha'][:16] }}</div>
+                </div>
+                <div style="text-align:right;">
+                    <div class="order-total">${{ "%.2f"|format(p['total']) }} MXN</div>
+                    <span class="status-pill status-{{ p['status'] }}">
+                        {{ STATUS_LABELS[p['status']] }}
+                    </span>
+                </div>
+            </div>
+
+            <div style="font-size:.85rem;color:rgba(255,255,255,.5);margin-bottom:.75rem;">
+                📍 {{ p['calle'] }}, {{ p['colonia'] }}, {{ p['ciudad'] }}, {{ p['estado'] }} CP {{ p['cp'] }}
+            </div>
+
+            <!-- TRACKING BAR -->
+            <div class="tracking-bar">
+                {% set icons = ['📋','📦','🚚','🛣️','🏠'] %}
+                {% set labels = ['Recibido','Preparando','Enviado','En Camino','Entregado'] %}
+                {% for i in range(5) %}
+                    <div class="tracking-step">
+                        <div class="tracking-dot {% if i < current_idx %}done{% elif i == current_idx %}active{% endif %}">
+                            {% if i < current_idx %}✓{% else %}{{ icons[i] }}{% endif %}
+                        </div>
+                        <div class="tracking-label {% if i <= current_idx %}{% if i < current_idx %}done{% else %}active{% endif %}{% endif %}">
+                            {{ labels[i] }}
+                        </div>
+                    </div>
+                    {% if i < 4 %}
+                    <div class="tracking-line {% if i < current_idx %}done{% endif %}"></div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+        </div>
+        </a>
+        {% endfor %}
+
+        {% else %}
+        <div class="empty-cart">
+            <div class="empty-cart-icon">📦</div>
+            <h3>Aún no tienes pedidos</h3>
+            <p>¡Haz tu primera compra y empieza a entrenar como un pro!</p>
+            <a href="{{ url_for('index') }}" class="btn-primary">Ver Productos</a>
+        </div>
+        {% endif %}
+
+    </div>
+</section>
+{% endblock %}

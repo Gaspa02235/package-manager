@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+
+{% block title %}Gymmies Store — Tu Equipo de Gym{% endblock %}
+
+{% block content %}
+
+<!-- AVISOS BAR -->
+{% if avisos %}
+<div class="avisos-bar">
+    {% for av in avisos %}
+    <div class="aviso-item">
+        <span class="aviso-icon">📢</span>
+        <span class="aviso-titulo">{{ av['titulo'] }}:</span>
+        <span class="aviso-cuerpo">{{ av['cuerpo'] }}</span>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- HERO BANNER -->
+{% if not categoria_activa %}
+<section class="hero">
+    <div class="hero-bg">
+        <div class="hero-noise"></div>
+        <div class="hero-lines"></div>
+    </div>
+    <div class="hero-content">
+        <div class="hero-badge">🔥 Nueva Colección 2024</div>
+        <h1 class="hero-title">
+            <span class="hero-title-main">UNLEASH</span>
+            <span class="hero-title-sub">YOUR INNER</span>
+            <span class="hero-title-accent">STRENGTH</span>
+        </h1>
+        <p class="hero-desc">Equipo de gym de alto rendimiento para atletas que van en serio. Calidad profesional, precio justo.</p>
+        <div class="hero-cta">
+            <a href="#productos" class="btn-primary">Ver Productos</a>
+            <a href="{{ url_for('categoria', nombre='Pesas') }}" class="btn-outline">Explorar Pesas</a>
+        </div>
+        <div class="hero-stats">
+            <div class="stat"><span class="stat-num">500+</span><span class="stat-label">Productos</span></div>
+            <div class="stat-divider"></div>
+            <div class="stat"><span class="stat-num">10k+</span><span class="stat-label">Clientes</span></div>
+            <div class="stat-divider"></div>
+            <div class="stat"><span class="stat-num">98%</span><span class="stat-label">Satisfacción</span></div>
+        </div>
+    </div>
+    <div class="hero-visual">
+        <div class="hero-panda">🐼</div>
+        <div class="hero-glow"></div>
+    </div>
+</section>
+
+<!-- CATEGORIES STRIP -->
+<section class="categories-strip">
+    <div class="container">
+        <a href="{{ url_for('categoria', nombre='Pesas') }}" class="cat-card cat-pesas">
+            <div class="cat-icon">🏋️</div>
+            <div class="cat-info">
+                <h3>Pesas</h3>
+                <p>Mancuernas, barras, kettlebells</p>
+            </div>
+            <span class="cat-arrow">→</span>
+        </a>
+        <a href="{{ url_for('categoria', nombre='Accesorios') }}" class="cat-card cat-acc">
+            <div class="cat-icon">🎽</div>
+            <div class="cat-info">
+                <h3>Accesorios</h3>
+                <p>Cuerdas, guantes, bandas</p>
+            </div>
+            <span class="cat-arrow">→</span>
+        </a>
+        <a href="{{ url_for('categoria', nombre='Ropa') }}" class="cat-card cat-ropa">
+            <div class="cat-icon">👕</div>
+            <div class="cat-info">
+                <h3>Ropa Deportiva</h3>
+                <p>Playeras, shorts, leggings</p>
+            </div>
+            <span class="cat-arrow">→</span>
+        </a>
+    </div>
+</section>
+
+<!-- PROMO BANNER -->
+<section class="promo-banner">
+    <div class="container">
+        <div class="promo-content">
+            <span class="promo-tag">OFERTA ESPECIAL</span>
+            <h2>Envío GRATIS en pedidos mayores a $999 MXN</h2>
+            <p>Tiempo limitado · Solo esta semana</p>
+        </div>
+        <div class="promo-timer">⚡ ¡Aprovecha ahora!</div>
+    </div>
+</section>
+{% endif %}
+
+<!-- PRODUCTS SECTION -->
+<section class="products-section" id="productos">
+    <div class="container">
+        {% if categoria_activa %}
+        <div class="section-header">
+            <div class="section-tag">Categoría</div>
+            <h2 class="section-title">{{ categoria_activa }}</h2>
+            <a href="{{ url_for('index') }}" class="back-link">← Ver todos</a>
+        </div>
+        {% else %}
+        <div class="section-header">
+            <div class="section-tag">Catálogo</div>
+            <h2 class="section-title">Productos Destacados</h2>
+        </div>
+        {% endif %}
+
+        <div class="products-grid">
+            {% for p in productos %}
+            <article class="product-card">
+                <a href="{{ url_for('producto', id=p['id']) }}" class="product-img-link">
+                    <div class="product-img-wrap">
+                        <div class="product-img-placeholder">
+                            {% if p['categoria'] == 'Pesas' %}🏋️
+                            {% elif p['categoria'] == 'Accesorios' %}🎽
+                            {% else %}👕{% endif %}
+                        </div>
+                        <div class="product-overlay">
+                            <span>Ver detalle →</span>
+                        </div>
+                    </div>
+                    <div class="product-cat-badge">{{ p['categoria'] }}</div>
+                </a>
+                <div class="product-info">
+                    <h3 class="product-name">{{ p['nombre'] }}</h3>
+                    <p class="product-desc">{{ p['descripcion'][:60] }}{% if p['descripcion']|length > 60 %}...{% endif %}</p>
+                    <div class="product-footer">
+                        <span class="product-price">${{ "%.2f"|format(p['precio']) }}</span>
+                        <form action="{{ url_for('agregar', id=p['id']) }}" method="POST" class="add-form">
+                            <input type="hidden" name="cantidad" value="1">
+                            <button type="submit" class="btn-add">
+                                <span>🛒</span> Agregar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </article>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">🏋️</div>
+                <h3>No hay productos en esta categoría</h3>
+                <a href="{{ url_for('index') }}" class="btn-primary">Ver todos</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- WHY GYMMIES -->
+{% if not categoria_activa %}
+<section class="why-section">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-tag">¿Por qué elegirnos?</div>
+            <h2 class="section-title">La diferencia Gymmies</h2>
+        </div>
+        <div class="why-grid">
+            <div class="why-card">
+                <div class="why-icon">⚡</div>
+                <h3>Envío Express</h3>
+                <p>Recibe tu equipo en 24-48 horas en toda la República.</p>
+            </div>
+            <div class="why-card">
+                <div class="why-icon">🏆</div>
+                <h3>Calidad Pro</h3>
+                <p>Solo vendemos equipo que cumple estándares de competencia.</p>
+            </div>
+            <div class="why-card">
+                <div class="why-icon">🛡️</div>
+                <h3>Garantía 1 Año</h3>
+                <p>Todos nuestros productos tienen garantía de 12 meses.</p>
+            </div>
+            <div class="why-card">
+                <div class="why-icon">💬</div>
+                <h3>Asesoría Gratis</h3>
+                <p>Nuestros expertos te ayudan a elegir el mejor equipo.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Smooth scroll for hero CTA
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) target.scrollIntoView({ behavior: 'smooth' });
+        });
+    });
+
+    // Animate product cards on scroll
+    const cards = document.querySelectorAll('.product-card');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry, i) => {
+            if (entry.isIntersecting) {
+                setTimeout(() => entry.target.classList.add('visible'), i * 80);
+            }
+        });
+    }, { threshold: 0.1 });
+    cards.forEach(card => observer.observe(card));
+</script>
+{% endblock %}

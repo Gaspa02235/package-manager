@@ -1,0 +1,255 @@
+{% extends 'base.html' %}
+
+{% block title %}Panel Admin — Gymmies Store{% endblock %}
+
+{% block content %}
+<section class="admin-section">
+    <div class="container">
+
+        <div class="section-header">
+            <div class="section-tag">Administración</div>
+            <h2 class="section-title">🛡️ Panel de Control</h2>
+        </div>
+
+        <!-- STATS -->
+        <div class="admin-stats">
+            <div class="admin-stat-card">
+                <div class="admin-stat-num">{{ productos|length }}</div>
+                <div class="admin-stat-label">Productos</div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="admin-stat-num">{{ pedidos|length }}</div>
+                <div class="admin-stat-label">Pedidos Totales</div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="admin-stat-num">{{ pedidos_hoy }}</div>
+                <div class="admin-stat-label">Pedidos Hoy</div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="admin-stat-num">${{ "%.0f"|format(total_ventas) }}</div>
+                <div class="admin-stat-label">Ventas Totales MXN</div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="admin-stat-num" style="color:#4ade80;">${{ "%.0f"|format(total_ganancia) }}</div>
+                <div class="admin-stat-label">Ganancia Est. Total</div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="admin-stat-num">{{ avisos|selectattr('activo','equalto',1)|list|length }}</div>
+                <div class="admin-stat-label">Avisos Activos</div>
+            </div>
+        </div>
+
+        <!-- TABS -->
+        <div class="admin-tabs">
+            <button class="admin-tab-btn active" onclick="showTab('productos')">📦 Productos</button>
+            <button class="admin-tab-btn" onclick="showTab('pedidos')">🧾 Pedidos</button>
+            <button class="admin-tab-btn" onclick="showTab('avisos')">📢 Avisos</button>
+        </div>
+
+        <!-- TAB: PRODUCTOS -->
+        <div class="admin-tab-pane active" id="tab-productos">
+
+            <div style="display:flex; justify-content:flex-end; margin-bottom:1rem;">
+                <a href="{{ url_for('nuevo_producto') }}" class="btn-primary" style="text-decoration:none;">+ Agregar Producto</a>
+            </div>
+
+            <div style="overflow-x:auto;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nombre</th>
+                        <th>Categoría</th>
+                        <th>Costo</th>
+                        <th>Precio Venta</th>
+                        <th>Ganancia</th>
+                        <th>Stock</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in productos %}
+                    {% set ganancia = p['precio'] - p['costo'] %}
+                    {% set margen = ((ganancia / p['precio']) * 100) if p['precio'] > 0 else 0 %}
+                    <tr>
+                        <td>{{ p['id'] }}</td>
+                        <td><strong>{{ p['nombre'] }}</strong></td>
+                        <td>{{ p['categoria'] }}</td>
+                        <td style="color:rgba(255,180,100,.9);">${{ "%.2f"|format(p['costo']) }}</td>
+                        <td style="color:rgba(255,255,255,.9);">${{ "%.2f"|format(p['precio']) }}</td>
+                        <td>
+                            {% if ganancia > 0 %}
+                            <span style="color:#4ade80;font-weight:700;">
+                                ${{ "%.2f"|format(ganancia) }}
+                                <span style="font-size:.75rem;font-weight:400;opacity:.7;">({{ "%.0f"|format(margen) }}%)</span>
+                            </span>
+                            {% elif ganancia < 0 %}
+                            <span style="color:#f87171;font-weight:700;">-${{ "%.2f"|format(ganancia|abs) }}</span>
+                            {% else %}
+                            <span style="color:rgba(255,255,255,.4);">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if p['stock'] > 10 %}
+                            <span class="stock-badge stock-ok">{{ p['stock'] }}</span>
+                            {% elif p['stock'] > 0 %}
+                            <span class="stock-badge stock-low">{{ p['stock'] }}</span>
+                            {% else %}
+                            <span class="stock-badge stock-out">0</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <form method="POST" action="{{ url_for('admin_eliminar_producto', id=p['id']) }}"
+                                  onsubmit="return confirm('¿Eliminar {{ p['nombre'] }}?')">
+                                <button type="submit" class="btn-sm btn-danger">🗑 Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="8" style="text-align:center;color:rgba(255,255,255,.4);">No hay productos</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        </div>
+
+        <!-- TAB: PEDIDOS -->
+        <div class="admin-tab-pane" id="tab-pedidos">
+            <div style="overflow-x:auto;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Cliente</th>
+                        <th>Ciudad</th>
+                        <th>Total</th>
+                        <th>Fecha</th>
+                        <th>Status</th>
+                        <th>Cambiar Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in pedidos %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('detalle_pedido', id=p['id']) }}"
+                               style="color:var(--primary);text-decoration:none;font-weight:700;">#{{ p['id'] }}</a>
+                        </td>
+                        <td>
+                            <div><strong>{{ p['nombre_cliente'] }}</strong></div>
+                            <div style="font-size:.75rem;color:rgba(255,255,255,.4);">{{ p['email'] }}</div>
+                        </td>
+                        <td>{{ p['ciudad'] }}, {{ p['estado'] }}</td>
+                        <td><strong>${{ "%.2f"|format(p['total']) }}</strong></td>
+                        <td style="font-size:.8rem;color:rgba(255,255,255,.5);">{{ p['fecha'][:16] }}</td>
+                        <td>
+                            <span class="status-pill status-{{ p['status'] }}">
+                                {{ STATUS_LABELS[p['status']] }}
+                            </span>
+                        </td>
+                        <td>
+                            <form method="POST" action="{{ url_for('admin_status_pedido', id=p['id']) }}"
+                                  style="display:flex;gap:.4rem;align-items:center;">
+                                <select name="status" class="status-select">
+                                    <option value="recibido"   {% if p['status']=='recibido'   %}selected{% endif %}>Recibido</option>
+                                    <option value="preparando" {% if p['status']=='preparando' %}selected{% endif %}>Preparando</option>
+                                    <option value="enviado"    {% if p['status']=='enviado'    %}selected{% endif %}>Enviado</option>
+                                    <option value="en_camino"  {% if p['status']=='en_camino'  %}selected{% endif %}>En Camino</option>
+                                    <option value="entregado"  {% if p['status']=='entregado'  %}selected{% endif %}>Entregado</option>
+                                </select>
+                                <button type="submit" class="btn-sm btn-toggle">✓</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="7" style="text-align:center;color:rgba(255,255,255,.4);">Sin pedidos aún</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        </div>
+
+        <!-- TAB: AVISOS -->
+        <div class="admin-tab-pane" id="tab-avisos">
+
+            <!-- Formulario nuevo aviso -->
+            <form method="POST" action="{{ url_for('admin_nuevo_aviso') }}" class="aviso-form">
+                <div class="form-group">
+                    <label>Título del aviso</label>
+                    <input type="text" name="titulo" placeholder="Ej. Envío Express" required
+                           style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#fff;padding:.7rem .9rem;border-radius:8px;font-size:.95rem;font-family:inherit;">
+                </div>
+                <div class="form-group">
+                    <label>Mensaje</label>
+                    <input type="text" name="cuerpo" placeholder="Ej. Envíos gratis esta semana en toda la república" required
+                           style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#fff;padding:.7rem .9rem;border-radius:8px;font-size:.95rem;font-family:inherit;">
+                </div>
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <button type="submit" class="btn-primary">📢 Publicar</button>
+                </div>
+            </form>
+
+            <!-- Lista avisos -->
+            <div style="overflow-x:auto;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Mensaje</th>
+                        <th>Estado</th>
+                        <th>Fecha</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for av in avisos %}
+                    <tr>
+                        <td><strong>{{ av['titulo'] }}</strong></td>
+                        <td style="color:rgba(255,255,255,.65);">{{ av['cuerpo'] }}</td>
+                        <td>
+                            {% if av['activo'] %}
+                            <span class="stock-badge stock-ok">Activo</span>
+                            {% else %}
+                            <span class="stock-badge stock-out">Inactivo</span>
+                            {% endif %}
+                        </td>
+                        <td style="font-size:.8rem;color:rgba(255,255,255,.4);">{{ av['fecha'][:16] }}</td>
+                        <td style="display:flex;gap:.5rem;">
+                            <form method="POST" action="{{ url_for('admin_toggle_aviso', id=av['id']) }}">
+                                <button type="submit" class="btn-sm btn-toggle">
+                                    {% if av['activo'] %}⏸ Pausar{% else %}▶ Activar{% endif %}
+                                </button>
+                            </form>
+                            <form method="POST" action="{{ url_for('admin_eliminar_aviso', id=av['id']) }}"
+                                  onsubmit="return confirm('¿Eliminar este aviso?')">
+                                <button type="submit" class="btn-sm btn-danger">🗑</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="5" style="text-align:center;color:rgba(255,255,255,.4);">Sin avisos creados</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        </div>
+
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function showTab(name) {
+    document.querySelectorAll('.admin-tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    event.target.classList.add('active');
+}
+// Auto-hide flash
+setTimeout(() => {
+    document.querySelectorAll('.flash').forEach(f => f.style.opacity = '0');
+}, 3500);
+</script>
+{% endblock %}

@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ producto['nombre'] }} — Gymmies Store{% endblock %}
+
+{% block content %}
+<section class="product-detail-section">
+    <div class="container">
+
+        <nav class="breadcrumb">
+            <a href="{{ url_for('index') }}">Inicio</a>
+            <span>›</span>
+            <a href="{{ url_for('categoria', nombre=producto['categoria']) }}">{{ producto['categoria'] }}</a>
+            <span>›</span>
+            <span>{{ producto['nombre'] }}</span>
+        </nav>
+
+        <div class="product-detail">
+            <!-- Product Image -->
+            <div class="detail-gallery">
+                <div class="detail-img-main">
+                    <div class="detail-img-placeholder">
+                        {% if producto['categoria'] == 'Pesas' %}🏋️
+                        {% elif producto['categoria'] == 'Accesorios' %}🎽
+                        {% else %}👕{% endif %}
+                    </div>
+                    <div class="detail-badge">{{ producto['categoria'] }}</div>
+                </div>
+                <div class="detail-img-thumbs">
+                    <div class="thumb active">📦</div>
+                    <div class="thumb">🔍</div>
+                    <div class="thumb">⭐</div>
+                </div>
+            </div>
+
+            <!-- Product Info -->
+            <div class="detail-info">
+                <div class="detail-tag">{{ producto['categoria'] }}</div>
+                <h1 class="detail-title">{{ producto['nombre'] }}</h1>
+
+                <div class="detail-rating">
+                    <span class="stars">★★★★★</span>
+                    <span class="rating-count">(128 reseñas)</span>
+                </div>
+
+                <div class="detail-price-wrap">
+                    <span class="detail-price">${{ "%.2f"|format(producto['precio']) }}</span>
+                    <span class="detail-currency">MXN</span>
+                </div>
+
+                <div class="detail-desc">
+                    <h3>Descripción</h3>
+                    <p>{{ producto['descripcion'] }}</p>
+                </div>
+
+                <div class="detail-features">
+                    <div class="feature-item"><span>✓</span> Garantía 12 meses</div>
+                    <div class="feature-item"><span>✓</span> Envío gratis en pedidos +$999</div>
+                    <div class="feature-item"><span>✓</span> Calidad profesional</div>
+                </div>
+
+                <div class="product-stock-info">
+                    {% if producto['stock'] > 10 %}
+                    <span class="stock-badge stock-ok">✓ En stock ({{ producto['stock'] }} disponibles)</span>
+                    {% elif producto['stock'] > 0 %}
+                    <span class="stock-badge stock-low">⚡ Últimas {{ producto['stock'] }} unidades</span>
+                    {% else %}
+                    <span class="stock-badge stock-out">✕ Agotado</span>
+                    {% endif %}
+                </div>
+
+                <form action="{{ url_for('agregar', id=producto['id']) }}" method="POST" class="detail-add-form">
+                    <div class="quantity-selector">
+                        <label>Cantidad:</label>
+                        <div class="qty-controls">
+                            <button type="button" class="qty-btn" onclick="changeQty(-1)">−</button>
+                            <input type="number" name="cantidad" id="cantidad" value="1" min="1" max="{{ producto['stock'] }}" class="qty-input">
+                            <button type="button" class="qty-btn" onclick="changeQty(1)">+</button>
+                        </div>
+                    </div>
+                    {% if producto['stock'] > 0 %}
+                    <button type="submit" class="btn-primary btn-full">
+                        🛒 Agregar al Carrito
+                    </button>
+                    {% else %}
+                    <button type="button" class="btn-primary btn-full" disabled style="opacity:.5;cursor:not-allowed;">
+                        Sin stock disponible
+                    </button>
+                    {% endif %}
+                </form>
+
+                <a href="{{ url_for('index') }}" class="btn-back">← Seguir comprando</a>
+            </div>
+        </div>
+
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function changeQty(delta) {
+    const input = document.getElementById('cantidad');
+    const val = parseInt(input.value) + delta;
+    const max = parseInt(input.max) || 99;
+    if (val >= 1 && val <= max) input.value = val;
+}
+</script>
+{% endblock %}

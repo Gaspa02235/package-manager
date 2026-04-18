@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout — Gymmies Store{% endblock %}
+
+{% block content %}
+<section class="checkout-section">
+    <div class="container">
+
+        <div class="section-header">
+            <div class="section-tag">Finalizar Compra</div>
+            <h2 class="section-title">📦 Datos de Envío</h2>
+        </div>
+
+        <form method="POST" action="{{ url_for('checkout') }}">
+        <div class="checkout-layout">
+
+            <!-- FORMULARIO IZQUIERDA -->
+            <div class="checkout-form-card">
+
+                <p class="section-divider">👤 Datos del Contacto</p>
+                <div class="form-grid">
+                    <div class="form-group full">
+                        <label>Nombre completo <span class="required-mark">*</span></label>
+                        <input type="text" name="nombre" placeholder="Ej. Juan García López"
+                               value="{{ datos.get('nombre','') }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Correo electrónico <span class="required-mark">*</span></label>
+                        <input type="email" name="email" placeholder="correo@ejemplo.com"
+                               value="{{ datos.get('email','') }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono</label>
+                        <input type="tel" name="telefono" placeholder="Ej. 33 1234 5678"
+                               value="{{ datos.get('telefono','') }}">
+                    </div>
+                </div>
+
+                <p class="section-divider">🏠 Dirección de Entrega</p>
+                <div class="form-grid">
+                    <div class="form-group full">
+                        <label>Calle y número <span class="required-mark">*</span></label>
+                        <input type="text" name="calle" placeholder="Ej. Av. Revolución 456 Int. 3"
+                               value="{{ datos.get('calle','') }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Colonia <span class="required-mark">*</span></label>
+                        <input type="text" name="colonia" placeholder="Ej. Centro Histórico"
+                               value="{{ datos.get('colonia','') }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Código Postal <span class="required-mark">*</span></label>
+                        <input type="text" name="cp" placeholder="Ej. 44100"
+                               value="{{ datos.get('cp','') }}" maxlength="5" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Ciudad <span class="required-mark">*</span></label>
+                        <input type="text" name="ciudad" placeholder="Ej. Guadalajara"
+                               value="{{ datos.get('ciudad','') }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Estado <span class="required-mark">*</span></label>
+                        <select name="estado" required>
+                            <option value="">Selecciona tu estado</option>
+                            {% set estados_mx = ['Aguascalientes','Baja California','Baja California Sur','Campeche','Chiapas','Chihuahua','Ciudad de México','Coahuila','Colima','Durango','Estado de México','Guanajuato','Guerrero','Hidalgo','Jalisco','Michoacán','Morelos','Nayarit','Nuevo León','Oaxaca','Puebla','Querétaro','Quintana Roo','San Luis Potosí','Sinaloa','Sonora','Tabasco','Tamaulipas','Tlaxcala','Veracruz','Yucatán','Zacatecas'] %}
+                            {% for e in estados_mx %}
+                            <option value="{{ e }}" {% if datos.get('estado','') == e %}selected{% endif %}>{{ e }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="secure-badge" style="margin-top:1.5rem;">
+                    🔒 Tus datos están seguros y solo se usan para tu envío
+                </div>
+            </div>
+
+            <!-- RESUMEN DERECHA -->
+            <div class="checkout-order-card">
+                <h3>🧾 Resumen del Pedido</h3>
+
+                <div class="checkout-items-list">
+                    {% for item in items %}
+                    <div class="checkout-item">
+                        <div>
+                            <div class="checkout-item-name">{{ item['nombre'] }}</div>
+                            <div class="checkout-item-qty">× {{ item['cantidad'] }}</div>
+                        </div>
+                        <div class="checkout-item-price">${{ "%.2f"|format(item['subtotal']) }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="summary-divider"></div>
+
+                <div class="summary-rows">
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span>${{ "%.2f"|format(subtotal) }}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Envío</span>
+                        <span class="free-shipping">
+                            {% if envio == 0 %}🎉 GRATIS{% else %}${{ "%.2f"|format(envio) }}{% endif %}
+                        </span>
+                    </div>
+                    {% if envio > 0 %}
+                    <div class="shipping-notice">
+                        Agrega ${{ "%.2f"|format(999 - subtotal) }} más para envío gratis
+                    </div>
+                    {% endif %}
+                    <div class="summary-divider"></div>
+                    <div class="summary-row summary-total">
+                        <span>Total</span>
+                        <span>${{ "%.2f"|format(total) }} MXN</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary btn-full btn-checkout" style="margin-top:1.5rem;">
+                    ⚡ Confirmar Pedido
+                </button>
+
+                <a href="{{ url_for('carrito') }}" class="btn-outline btn-full" style="margin-top:.75rem;display:block;text-align:center;">
+                    ← Volver al Carrito
+                </a>
+            </div>
+
+        </div>
+        </form>
+
+    </div>
+</section>
+{% endblock %}

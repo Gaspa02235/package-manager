@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}¡Pedido Confirmado! — Gymmies Store{% endblock %}
+
+{% block content %}
+<section class="checkout-ok-section">
+    <div class="container">
+        <div class="checkout-ok-card">
+            <div class="ok-icon-wrap">
+                <div class="ok-icon">✓</div>
+                <div class="ok-rings">
+                    <div class="ok-ring r1"></div>
+                    <div class="ok-ring r2"></div>
+                    <div class="ok-ring r3"></div>
+                </div>
+            </div>
+
+            <div class="ok-badge">🔥 ¡PEDIDO CONFIRMADO!</div>
+            <h1 class="ok-title">¡Tu pedido #{{ pedido['id'] }}<br><span>está en camino!</span></h1>
+
+            <p class="ok-desc">
+                Gracias, <strong>{{ pedido['nombre_cliente'].split()[0] }}</strong>. Hemos recibido tu pedido y
+                lo enviaremos a <strong>{{ pedido['ciudad'] }}, {{ pedido['estado'] }}</strong>.
+                Recibirás actualizaciones en <strong>{{ pedido['email'] }}</strong>.
+            </p>
+
+            <!-- TRACKING -->
+            {% set status_order = ['recibido','preparando','enviado','en_camino','entregado'] %}
+            {% set current_idx  = status_order.index(pedido['status']) %}
+            {% set icons  = ['📋','📦','🚚','🛣️','🏠'] %}
+            {% set labels = ['Recibido','Preparando','Enviado','En Camino','Entregado'] %}
+
+            <div class="tracking-bar" style="max-width:500px;margin:1.5rem auto;">
+                {% for i in range(5) %}
+                    <div class="tracking-step">
+                        <div class="tracking-dot {% if i < current_idx %}done{% elif i == current_idx %}active{% endif %}">
+                            {% if i < current_idx %}✓{% else %}{{ icons[i] }}{% endif %}
+                        </div>
+                        <div class="tracking-label {% if i <= current_idx %}{% if i < current_idx %}done{% else %}active{% endif %}{% endif %}">
+                            {{ labels[i] }}
+                        </div>
+                    </div>
+                    {% if i < 4 %}
+                    <div class="tracking-line {% if i < current_idx %}done{% endif %}"></div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <!-- Resumen mini -->
+            <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:1.25rem;max-width:420px;margin:0 auto 1.5rem;text-align:left;">
+                {% for item in items %}
+                <div style="display:flex;justify-content:space-between;font-size:.875rem;padding:.35rem 0;border-bottom:1px solid rgba(255,255,255,.06);">
+                    <span style="color:rgba(255,255,255,.8);">{{ item['nombre_producto'] }} × {{ item['cantidad'] }}</span>
+                    <span style="font-weight:700;">${{ "%.2f"|format(item['subtotal']) }}</span>
+                </div>
+                {% endfor %}
+                <div style="display:flex;justify-content:space-between;font-size:.875rem;padding:.35rem 0;">
+                    <span style="color:rgba(255,255,255,.5);">Envío</span>
+                    <span>{% if pedido['envio'] == 0 %}🎉 GRATIS{% else %}${{ "%.2f"|format(pedido['envio']) }}{% endif %}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:1rem;font-weight:900;padding-top:.5rem;border-top:1px solid rgba(255,255,255,.1);">
+                    <span>Total</span>
+                    <span style="color:var(--primary);">${{ "%.2f"|format(pedido['total']) }} MXN</span>
+                </div>
+            </div>
+
+            <div class="ok-panda">🐼</div>
+            <div class="ok-quote">"Unleash Your Inner Strength"</div>
+
+            <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:1.5rem;">
+                <a href="{{ url_for('detalle_pedido', id=pedido['id']) }}" class="btn-outline"
+                   style="text-decoration:none;">📦 Seguir Pedido</a>
+                <a href="{{ url_for('index') }}" class="btn-primary ok-btn"
+                   style="text-decoration:none;">Seguir Comprando →</a>
+            </div>
+
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const colors = ['#e63946', '#ffffff', '#adb5bd', '#ff6b6b'];
+    for (let i = 0; i < 60; i++) {
+        const dot = document.createElement('div');
+        dot.style.cssText = `
+            position:fixed; width:${Math.random()*10+4}px; height:${Math.random()*10+4}px;
+            background:${colors[Math.floor(Math.random()*colors.length)]};
+            border-radius:50%; top:-20px;
+            left:${Math.random()*100}vw; pointer-events:none; z-index:9999;
+            animation: fall ${Math.random()*3+2}s linear ${Math.random()*2}s forwards;
+        `;
+        document.body.appendChild(dot);
+    }
+    const style = document.createElement('style');
+    style.textContent = `@keyframes fall { to { transform: translateY(105vh) rotate(720deg); opacity:0; } }`;
+    document.head.appendChild(style);
+});
+// Auto-hide flash
+setTimeout(() => {
+    document.querySelectorAll('.flash').forEach(f => { f.style.transition='opacity .5s'; f.style.opacity='0'; });
+}, 3500);
+</script>
+{% endblock %}

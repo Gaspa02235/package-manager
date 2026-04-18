@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Agregar Producto — Gymmies Store{% endblock %}
+
+{% block content %}
+<section class="checkout-section">
+    <div class="container" style="max-width:680px;">
+
+        <div class="section-header">
+            <div class="section-tag">Admin</div>
+            <h2 class="section-title">➕ Nuevo Producto</h2>
+        </div>
+
+        <div class="checkout-form-card">
+            <form method="POST" action="{{ url_for('nuevo_producto') }}">
+
+                <div class="form-grid">
+                    <div class="form-group full">
+                        <label>Nombre del producto <span class="required-mark">*</span></label>
+                        <input type="text" name="nombre" placeholder="Ej. Barra Olímpica 20kg" required>
+                    </div>
+
+                    <div class="form-group full">
+                        <label>Descripción <span class="required-mark">*</span></label>
+                        <textarea name="descripcion" rows="3" placeholder="Describe el producto..."
+                                  style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#fff;padding:.7rem .9rem;border-radius:8px;font-size:.95rem;font-family:inherit;resize:vertical;" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Precio de Venta (MXN) <span class="required-mark">*</span></label>
+                        <input type="number" name="precio" step="0.01" min="0" placeholder="Ej. 899.00" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Costo del Producto (MXN) <span class="required-mark">*</span></label>
+                        <input type="number" name="costo" step="0.01" min="0" placeholder="Ej. 550.00" required value="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Stock inicial <span class="required-mark">*</span></label>
+                        <input type="number" name="stock" min="0" value="0" placeholder="Ej. 20" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Categoría <span class="required-mark">*</span></label>
+                        <select name="categoria" required>
+                            <option value="">Selecciona...</option>
+                            <option value="Pesas">🏋️ Pesas</option>
+                            <option value="Accesorios">🎽 Accesorios</option>
+                            <option value="Ropa">👕 Ropa Deportiva</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nombre imagen (opcional)</label>
+                        <input type="text" name="imagen" placeholder="Ej. producto.jpg">
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:1rem; margin-top:1.5rem; flex-wrap:wrap;">
+                    <button type="submit" class="btn-primary">✅ Guardar Producto</button>
+                    <a href="{{ url_for('admin_panel') }}" class="btn-outline"
+                       style="text-decoration:none; display:inline-flex; align-items:center;">← Cancelar</a>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+</section>
+{% endblock %}

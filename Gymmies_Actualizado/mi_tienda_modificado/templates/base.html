@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Gymmies Store{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,400;0,600;0,700;0,900;1,400&family=Barlow+Condensed:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="nav-brand">
+                <span class="brand-icon">🐼</span>
+                <span class="brand-text">GYMMIES</span>
+            </a>
+
+            <button class="nav-toggle" id="navToggle" aria-label="Menú">
+                <span></span><span></span><span></span>
+            </button>
+
+            <ul class="nav-links" id="navLinks">
+                <li><a href="{{ url_for('index') }}" class="nav-link">Inicio</a></li>
+                <li class="dropdown">
+                    <a href="#" class="nav-link dropdown-toggle">Categorías ▾</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{{ url_for('categoria', nombre='Pesas') }}">🏋️ Pesas</a></li>
+                        <li><a href="{{ url_for('categoria', nombre='Accesorios') }}">🎽 Accesorios</a></li>
+                        <li><a href="{{ url_for('categoria', nombre='Ropa') }}">👕 Ropa Deportiva</a></li>
+                    </ul>
+                </li>
+                {% if session.get('rol') == 'admin' %}
+                <li><a href="{{ url_for('admin_panel') }}" class="nav-link nav-link-admin">🛡️ Admin</a></li>
+                {% endif %}
+                {% if session.get('rol') != 'admin' %}
+                <li><a href="{{ url_for('mis_pedidos') }}" class="nav-link">Mis Pedidos</a></li>
+                {% endif %}
+                <li>
+                    <a href="{{ url_for('carrito') }}" class="nav-cart">
+                        <span class="cart-icon">🛒</span>
+                        <span class="cart-label">Carrito</span>
+                        {% if carrito_count > 0 %}<span class="cart-count">{{ carrito_count }}</span>{% endif %}
+                    </a>
+                </li>
+                {% if session.get('usuario') %}
+                <li class="nav-user">
+                    <span class="nav-user-badge {% if session.get('rol') == 'admin' %}badge-admin{% else %}badge-buyer{% endif %}">
+                        {% if session.get('rol') == 'admin' %}🛡️{% else %}🛒{% endif %}
+                        {{ session.get('usuario') }}
+                    </span>
+                    <a href="{{ url_for('logout') }}" class="nav-logout">Salir</a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <!-- FLASH MESSAGES -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-container">
+        {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <span class="brand-icon">🐼</span>
+                <span class="brand-text">GYMMIES</span>
+                <p class="footer-tagline">Unleash Your Inner Strength</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-col">
+                    <h4>Tienda</h4>
+                    <a href="{{ url_for('categoria', nombre='Pesas') }}">Pesas</a>
+                    <a href="{{ url_for('categoria', nombre='Accesorios') }}">Accesorios</a>
+                    <a href="{{ url_for('categoria', nombre='Ropa') }}">Ropa Deportiva</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Soporte</h4>
+                    <a href="#">Contacto</a>
+                    <a href="#">Envíos</a>
+                    <a href="#">Devoluciones</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Síguenos</h4>
+                    <a href="#">Instagram</a>
+                    <a href="#">TikTok</a>
+                    <a href="#">YouTube</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Gymmies Store — Hecho con 💪 en México</p>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile nav toggle
+        const toggle = document.getElementById('navToggle');
+        const links = document.getElementById('navLinks');
+        toggle.addEventListener('click', () => {
+            links.classList.toggle('open');
+            toggle.classList.toggle('active');
+        });
+
+        // Close dropdown on outside click
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.navbar')) {
+                links.classList.remove('open');
+            }
+        });
+        // Auto-hide flash messages
+        setTimeout(() => {
+            document.querySelectorAll('.flash').forEach(f => {
+                f.style.transition = 'opacity .5s';
+                f.style.opacity = '0';
+                setTimeout(() => f.remove(), 500);
+            });
+        }, 3500);
+    </script>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

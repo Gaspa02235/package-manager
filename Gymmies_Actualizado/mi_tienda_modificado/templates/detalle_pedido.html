@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Pedido #{{ pedido['id'] }} — Gymmies Store{% endblock %}
+
+{% block content %}
+<section class="orders-section">
+    <div class="container" style="max-width: 860px;">
+
+        <nav class="breadcrumb">
+            <a href="{{ url_for('index') }}">Inicio</a>
+            <span>›</span>
+            <a href="{{ url_for('mis_pedidos') }}">Mis Pedidos</a>
+            <span>›</span>
+            <span>Pedido #{{ pedido['id'] }}</span>
+        </nav>
+
+        <div class="section-header">
+            <div class="section-tag">Seguimiento</div>
+            <h2 class="section-title">Pedido #{{ pedido['id'] }}</h2>
+        </div>
+
+        <!-- TRACKING GRANDE -->
+        <div class="pedido-detail-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:.5rem; margin-bottom:1.5rem;">
+                <div>
+                    <span class="status-pill status-{{ pedido['status'] }}" style="font-size:.9rem;padding:.35rem 1rem;">
+                        {{ STATUS_LABELS[pedido['status']] }}
+                    </span>
+                </div>
+                <div style="font-size:.85rem;color:rgba(255,255,255,.45);">
+                    Realizado el {{ pedido['fecha'][:16] }}
+                </div>
+            </div>
+
+            {% set status_order = ['recibido','preparando','enviado','en_camino','entregado'] %}
+            {% set current_idx = status_order.index(pedido['status']) %}
+            {% set icons  = ['📋','📦','🚚','🛣️','🏠'] %}
+            {% set labels = ['Pedido Recibido','Preparando','Enviado','En Camino','Entregado'] %}
+
+            <div class="tracking-bar" style="margin: .5rem 0 .25rem;">
+                {% for i in range(5) %}
+                    <div class="tracking-step">
+                        <div class="tracking-dot {% if i < current_idx %}done{% elif i == current_idx %}active{% endif %}"
+                             style="width:36px;height:36px;font-size:.9rem;">
+                            {% if i < current_idx %}✓{% else %}{{ icons[i] }}{% endif %}
+                        </div>
+                        <div class="tracking-label {% if i <= current_idx %}{% if i < current_idx %}done{% else %}active{% endif %}{% endif %}"
+                             style="font-size:.7rem;">
+                            {{ labels[i] }}
+                        </div>
+                    </div>
+                    {% if i < 4 %}
+                    <div class="tracking-line {% if i < current_idx %}done{% endif %}"></div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="pedido-detail-grid">
+            <!-- Datos de envío -->
+            <div class="pedido-detail-card">
+                <h3 style="font-size:1rem;font-weight:800;margin-bottom:1.25rem;">📍 Dirección de Entrega</h3>
+                <div style="display:flex;flex-direction:column;gap:.9rem;">
+                    <div>
+                        <div class="detail-label">Destinatario</div>
+                        <div class="detail-value">{{ pedido['nombre_cliente'] }}</div>
+                    </div>
+                    <div>
+                        <div class="detail-label">Contacto</div>
+                        <div class="detail-value">{{ pedido['email'] }}</div>
+                        {% if pedido['telefono'] %}
+                        <div class="detail-value" style="font-size:.85rem;color:rgba(255,255,255,.6);">{{ pedido['telefono'] }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <div class="detail-label">Dirección</div>
+                        <div class="detail-value">{{ pedido['calle'] }}</div>
+                        <div class="detail-value" style="font-size:.85rem;color:rgba(255,255,255,.65);">
+                            {{ pedido['colonia'] }}, {{ pedido['ciudad'] }}, {{ pedido['estado'] }} CP {{ pedido['cp'] }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumen de productos -->
+            <div class="pedido-detail-card">
+                <h3 style="font-size:1rem;font-weight:800;margin-bottom:1.25rem;">🛍️ Productos</h3>
+                <div style="display:flex;flex-direction:column;gap:.75rem;">
+                    {% for item in items %}
+                    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:.6rem;">
+                        <div>
+                            <div style="font-weight:600;font-size:.9rem;">{{ item['nombre_producto'] }}</div>
+                            <div style="font-size:.78rem;color:rgba(255,255,255,.4);">
+                                {{ item['cantidad'] }} × ${{ "%.2f"|format(item['precio_unitario']) }}
+                            </div>
+                        </div>
+                        <div style="font-weight:800;color:var(--primary);">${{ "%.2f"|format(item['subtotal']) }}</div>
+                    </div>
+                    {% endfor %}
+
+                    <div style="display:flex;justify-content:space-between;padding:.25rem 0;font-size:.88rem;color:rgba(255,255,255,.5);">
+                        <span>Envío</span>
+                        <span>{% if pedido['envio'] == 0 %}🎉 GRATIS{% else %}${{ "%.2f"|format(pedido['envio']) }}{% endif %}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding-top:.5rem;border-top:1px solid rgba(255,255,255,.1);font-weight:900;font-size:1.05rem;">
+                        <span>Total</span>
+                        <span style="color:var(--primary);">${{ "%.2f"|format(pedido['total']) }} MXN</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:.5rem;">
+            <a href="{{ url_for('mis_pedidos') }}" class="btn-outline" style="text-decoration:none;">← Mis Pedidos</a>
+            <a href="{{ url_for('index') }}" class="btn-primary" style="text-decoration:none;">Seguir Comprando</a>
+        </div>
+
+    </div>
+</section>
+{% endblock %}
